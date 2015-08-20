@@ -16,7 +16,8 @@ import random
 import math
 from collections import namedtuple
 
-vertex = namedtuple('vertex', 'x y')
+vertex = namedtuple('vertex', 'x y') # This'll make the vertex tuple that we'll
+                                     # use for the chromosones
 
 # Example chromosone
 # [vertex(1, 5), vertex(2, 6), vertex(8, 3), vertex(2, 1), vertex(8, 7),
@@ -26,6 +27,7 @@ vertex = namedtuple('vertex', 'x y')
 class individual:
     'Individuals for genetic algorithm. Have chromosone and related functions.'
     def chromosonegen():
+        # Make random chromosones, coord x | 0 < x < 10
         v1 = vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
         v2 = vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
         v3 = vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
@@ -36,11 +38,11 @@ class individual:
 
     def __init__(self, chromosone=chromosonegen):
         self.chromosone = chromosone
-        mutation_rate = 0.02
+        self.mutation_rate = 0.02
 
-    def point_swap(self, chromosone=self.chromosone, outside_chromosone):
-#        swap_pos = random.randrange(1, 5, 1)
-#         temp_chromosone1 = chromosone[:swap_pos]
+    def point_swap(self, input_chromosone=self.chromosone, outside_chromosone):
+         swap_pos = random.randrange(1, 5, 1)
+#        temp_chromosone1 = chromosone[:swap_pos]
 #        temp_chromosone2 = outside_chromosone[swap_pos:]
-#        self.chromosone = test_chromosone1 + test_chromosone2
-
+         self.chromosone =\
+         imput_chromosone[:swap_pos] + test_chromosone2[swap_pos:]
