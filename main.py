@@ -1,5 +1,5 @@
 # Genetic algorithm to generate 6 sided shapes. Fitness score is determined by
-# regularity of angles. That is, it should generate a near perfect hexagon.
+# regularity of angles. That is, it should generate a near perfect hexagon.j
 
 # Chromosones are a list of XY coordinates.
 # More or less 6 genes, each with an XY pair defining the vertex.
@@ -38,6 +38,9 @@ class individual:
         self.chromosone = chromosone
         mutation_rate = 0.02
 
-    def point_swap(self, outside_chromosone):
-        self.swap_pos = random.randrange(1, 5, 1)
+    def point_swap(self, chromosone=self.chromosone, outside_chromosone):
+#        swap_pos = random.randrange(1, 5, 1)
+#         temp_chromosone1 = chromosone[:swap_pos]
+#        temp_chromosone2 = outside_chromosone[swap_pos:]
+#        self.chromosone = test_chromosone1 + test_chromosone2
 
