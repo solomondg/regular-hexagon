@@ -13,36 +13,37 @@
 # For the sake of theme, there'll be 6 members of the population per generation.
 
 import random
-import math
+# import math
 from collections import namedtuple
 
-vertex = namedtuple('vertex', 'x y') # This'll make the vertex tuple that we'll
-                                     # use for the chromosones
+Vertex = namedtuple('vertex', 'x y')  # This'll make the vertex tuple that we'll
+                                      # use for the chromosones
 
 # Example chromosone
 # [vertex(1, 5), vertex(2, 6), vertex(8, 3), vertex(2, 1), vertex(8, 7),
 #   vertex(3, 2)]
 
 
-class individual:
+class Individual:
     'Individuals for genetic algorithm. Have chromosone and related functions.'
-    def chromosonegen():
-        # Make random chromosones, coord x | 0 < x < 10
-        v1 = vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
-        v2 = vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
-        v3 = vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
-        v4 = vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
-        v5 = vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
-        v6 = vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
-        return [v1, v2, v3, v4, v5, v6]
+    def chromosonegen(self):
+        """Make random chromosones, coord x, y | 0 < x < 10 """
+        V1 = Vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
+        V2 = Vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
+        V3 = Vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
+        V4 = Vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
+        V5 = Vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
+        V6 = Vertex(random.randrange(0, 10, 1), random.randrange(0, 10, 1))
+        return [V1, V2, V3, V4, V5, V6]
 
-    def __init__(self, chromosone=chromosonegen):
+    def __init__(self, chromosone=chromosonegen()):
         self.chromosone = chromosone
         self.mutation_rate = 0.02
 
-    def point_swap(self, input_chromosone=self.chromosone, outside_chromosone):
-         swap_pos = random.randrange(1, 5, 1)
-#        temp_chromosone1 = chromosone[:swap_pos]
-#        temp_chromosone2 = outside_chromosone[swap_pos:]
-         self.chromosone =\
-         imput_chromosone[:swap_pos] + test_chromosone2[swap_pos:]
+    def point_swap(self, outside_chromosone, input_chromosone=chromosone):
+        """Swaps genes between two points in an input and output chromosone"""
+        swap_pos = random.randrange(1, 5, 1)
+#       temp_chromosone1 = chromosone[:swap_pos]
+#       temp_chromosone2 = outside_chromosone[swap_pos:]
+        self.chromosone =\
+        input_chromosone[:swap_pos] + outside_chromosone[swap_pos:]
