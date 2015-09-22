@@ -111,22 +111,29 @@ def fitness_select(fitness_dict):
     print ("")
     adjusted_fitness_list = []
     for x in sorted(fitness_dict):  # step one & 2, sorting high-low
-        adjusted_fitness_list = 360-x
+        adjusted_fitness_list.append(360-x)
+    print (adjusted_fitness_list)
     S = 0
     for x in adjusted_fitness_list:  # Step 3
         S += x
+    print (S)
     r = random.random()*360  # Step 4
+    print (r)
     s = 0  # Used for summing up values until greater than r
     x = 0  # Used for setting lastobj and summing up list stuff
     while s < r:  # Step 5
         s += adjusted_fitness_list[x]  # Step 5 cont
         lastobj = fitness_dict[(adjusted_fitness_list[x]-360) * -1]  # Lastobj
+        print (s)
         # used for determining step6
         x += 1
     winner = lastobj  # Step 6
     return winner
 
+
+
 # Just some tests
 test_case = Individual()
-print (test_case.chromosone)
-print (evaluator(test_case))
+# print (test_case.chromosone)
+# print (evaluator(test_case))
+print(fitness_select({75:"lmao", 88:"kay", 200:"lol", 300:"low", 0:"high"}))
