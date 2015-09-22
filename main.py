@@ -15,7 +15,6 @@
 import random
 import math
 from collections import namedtuple
-
 Vertex = namedtuple('vertex', 'x y')
 # This'll make the vertex tuple that we'll use for the chromosones.
 
@@ -30,33 +29,40 @@ Vertex = namedtuple('vertex', 'x y')
 #         pass
 
 
+def varstore():
+    varstore.mutation_rate = 0.02
+
+
 class Individual():
     'Individuals for genetic algorithm. Has chromosone and related functions.'
     def chromosonegen():
         """Make random chromosones, coord x, y | 0 < x < 10 """
-        vert1 = Vertex(random.random()*10,
-                       random.random()*10)
-        vert2 = Vertex(random.random()*10,
-                       random.random()*10)
-        vert3 = Vertex(random.random()*10,
-                       random.random()*10)
-        vert4 = Vertex(random.random()*10,
-                       random.random()*10)
-        vert5 = Vertex(random.random()*10,
-                       random.random()*10)
-        vert6 = Vertex(random.random()*10,
-                       random.random()*10)
+        vert1 = Vertex(round(random.random()*10, 3),
+                       round(random.random()*10, 3))
+        vert2 = Vertex(round(random.random()*10, 3),
+                       round(random.random()*10, 3))
+        vert3 = Vertex(round(random.random()*10, 3),
+                       round(random.random()*10, 3))
+        vert4 = Vertex(round(random.random()*10, 3),
+                       round(random.random()*10, 3))
+        vert5 = Vertex(round(random.random()*10, 3),
+                       round(random.random()*10, 3))
+        vert6 = Vertex(round(random.random()*10, 3),
+                       round(random.random()*10, 3))
         return [vert1, vert2, vert3, vert4, vert5, vert6]
 
     def __init__(self, input_chromosone=chromosonegen()):
         self.chromosone = input_chromosone
-        self.mutation_rate = 0.02
 
 
 def point_swap(input_chromosone, outside_chromosone):
     """Swaps genes between two points in an input and output chromosone"""
     swap_pos = random.randrange(1, 5, 1)  # Randomly picks pos to swap at
     return input_chromosone[:swap_pos] + outside_chromosone[swap_pos:]  # swaps
+
+
+def fragment_return(chromosone, startpos, endpos):
+    return chromosone[startpos:endpos]
 
 
 def evaluator(to_eval):
@@ -87,7 +93,40 @@ def find_angle(vertA, vertB, vertC):
     return deg_angle
 
 
+def roulette_gene_select(obj_set):  # obj_set is 1d matrix/list with all objects
+    fitness_set = {}                # of current generation
+    for x in obj_set:
+        fitness_set[evaluator(x)] = x
+
+
+def fitness_select(fitness_dict):
+    # How to roulette wheel select:
+    # 1. Compute "inverse" fitness score (360 - fitness)
+    # 2. Sort list from low to high fitness (maybe high to low, maybe random)
+    # 3. find sum of all fitness scores, S
+    # 4. Find random number r between 0 and S
+    # 5. If fitness value of first object is smaller than r, add second object
+    # fitness score. Repeat until greater than r
+    # 6. Winner = last object whose fitness score was added (first to go over r)
+    print ("")
+    adjusted_fitness_list = []
+    for x in sorted(fitness_dict):  # step one & 2, sorting high-low
+        adjusted_fitness_list = 360-x
+    S = 0
+    for x in adjusted_fitness_list:  # Step 3
+        S += x
+    r = random.random()*360  # Step 4
+    s = 0  # Used for summing up values until greater than r
+    x = 0  # Used for setting lastobj and summing up list stuff
+    while s < r:  # Step 5
+        s += adjusted_fitness_list[x]  # Step 5 cont
+        lastobj = fitness_dict[(adjusted_fitness_list[x]-360) * -1]  # Lastobj
+        # used for determining step6
+        x += 1
+    winner = lastobj  # Step 6
+    return winner
+
 # Just some tests
 test_case = Individual()
-print test_case.chromosone
-print evaluator(test_case)
+print (test_case.chromosone)
+print (evaluator(test_case))
