@@ -11,7 +11,8 @@
 #   total_deviation += math.abs(gene_vertex.angle)
 
 # There'll be 32 members of the population per generation.
-
+import sys
+import time
 import random
 import math
 from collections import namedtuple
@@ -108,34 +109,72 @@ def fitness_select(fitness_dict):
     # 5. If fitness value of first object is smaller than r, add second object
     # fitness score. Repeat until greater than r
     # 6. Winner = last object whose fitness score was added (first to go over r)
-    print ("")
+    x = 0
+    # print ("")
     adjusted_fitness_list = []
     for x in sorted(fitness_dict):  # step one & 2, sorting high-low
         adjusted_fitness_list.append(360-x)
-    print ('adjusted fitness list =', adjusted_fitness_list)
+    # print ('adjusted fitness list =', adjusted_fitness_list)
     S = 0
     for x in adjusted_fitness_list:  # Step 3
         S += x
-    print ('S = ', S)
+    # print ('S = ', S)
     # r = random.random()*S
     r = random.randint(0, S)  # Step 4)
-    print ('r = ', r)
+    # print ('r = ', r)
     adjusted_fitness_list = adjusted_fitness_list[::-1]
     s = 0  # Used for summing up values until greater than r
     x = 0  # Used for setting lastobj and summing up list stuff
+    lastobj = fitness_dict[(adjusted_fitness_list[x]-360) * -1]
+    x = 0
     while s < r:  # Step 5
         s += adjusted_fitness_list[x]  # Step 5 cont
         lastobj = fitness_dict[(adjusted_fitness_list[x]-360) * -1]  # Lastobj
-        print ('s =', s)
+        # print ('s =', s)
         # used for determining step6
+        # print (type(x))
         x += 1
+    # time.sleep(0.001)
     winner = lastobj  # Step 6
     return winner
 
 
 # Just some tests
 test_case = Individual()
-# print (test_case.chromosone)
-# print (evaluator(test_case))
-print(fitness_select({360: "F", 288: "E", 216: "D", 144: "C", 72: "B",
-                      0: "A"}))
+# # print (test_case.chromosone)
+# # print (evaluator(test_case))
+
+val_list = []
+n = 2 ** 24
+lastnum = 0
+for x in range(0, n):
+    val_list += fitness_select({006: "F", 005: "E", 004: "D", 003: "C", 02: "B",
+                                1: "A"})
+    if round((x / float(n)*100), 2) != lastnum:
+        lastnum = round((x / float(n))*100, 2)
+        print(str(lastnum) + "%  done")
+
+a, b, c, d, e, f = 0, 0, 0, 0, 0, 0
+for x in val_list:
+    if x == 'A':
+        a += 1
+    elif x == 'B':
+        b += 1
+    elif x == 'C':
+        c += 1
+    elif x == 'D':
+        d += 1
+    elif x == 'E':
+        e += 1
+    elif x == 'F':
+        f += 1
+
+print ("A occured " + str(a) + " times")
+print ("B occured " + str(b) + " times")
+print ("C occured " + str(c) + " times")
+print ("D occured " + str(d) + " times")
+print ("E occured " + str(e) + " times")
+print ("F occured " + str(f) + " times")
+
+# # print(fitness_select({360: "F", 288: "E", 216: "D", 144: "C", 72: "B",
+#                      0: "A"}))
