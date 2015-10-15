@@ -34,26 +34,30 @@ def varstore():
     varstore.mutation_rate = 0.02
 
 
+def chromosonegen():
+    """Make random chromosones, coord x, y | 0 < x < 10 """
+    vert1 = Vertex(round(random.random()*10, 3),
+                   round(random.random()*10, 3))
+    vert2 = Vertex(round(random.random()*10, 3),
+                   round(random.random()*10, 3))
+    vert3 = Vertex(round(random.random()*10, 3),
+                   round(random.random()*10, 3))
+    vert4 = Vertex(round(random.random()*10, 3),
+                   round(random.random()*10, 3))
+    vert5 = Vertex(round(random.random()*10, 3),
+                   round(random.random()*10, 3))
+    vert6 = Vertex(round(random.random()*10, 3),
+                   round(random.random()*10, 3))
+    return [vert1, vert2, vert3, vert4, vert5, vert6]
+
+
 class Individual():
     'Individuals for genetic algorithm. Has chromosone and related functions.'
-    def chromosonegen():
-        """Make random chromosones, coord x, y | 0 < x < 10 """
-        vert1 = Vertex(round(random.random()*10, 3),
-                       round(random.random()*10, 3))
-        vert2 = Vertex(round(random.random()*10, 3),
-                       round(random.random()*10, 3))
-        vert3 = Vertex(round(random.random()*10, 3),
-                       round(random.random()*10, 3))
-        vert4 = Vertex(round(random.random()*10, 3),
-                       round(random.random()*10, 3))
-        vert5 = Vertex(round(random.random()*10, 3),
-                       round(random.random()*10, 3))
-        vert6 = Vertex(round(random.random()*10, 3),
-                       round(random.random()*10, 3))
-        return [vert1, vert2, vert3, vert4, vert5, vert6]
-
-    def __init__(self, input_chromosone=chromosonegen()):
-        self.chromosone = input_chromosone
+    def __init__(self, input_chromosone=5):
+        if input_chromosone == 5:
+            self.chromosone = chromosonegen()
+        else:
+            self.chromosone = input_chromosone
 
 
 def point_swap(input_chromosone, outside_chromosone):
@@ -99,11 +103,14 @@ def find_angle(vertA, vertB, vertC):
 #         fitness_set[evaluator(x)] = x
 
 
-def make_fitness_dict(object_list):
+def make_fitness_dict(population_dict):
     fitness_dict = {}
-    for x in object_list:
-        fitness_dict[x] = evaluator(x)
-    return fitness_dict
+    for x in population_dict:
+        fitness_dict[x] = round(evaluator(population_dict[x]))
+    inverse_fitness_dict = {}
+    for x in fitness_dict:
+        inverse_fitness_dict[fitness_dict[x]] = x
+    return inverse_fitness_dict
 
 
 def fitness_select(fitness_dict):
@@ -117,9 +124,12 @@ def fitness_select(fitness_dict):
     # 6. Winner = last object whose fitness score was added (first to go over r)
     x = 0
     # print ("")
+    fitness_list = []
+    for x in fitness_dict:
+        fitness_list.append(x)
     adjusted_fitness_list = []
-    for x in sorted(fitness_dict):  # step one & 2, sorting high-low
-        adjusted_fitness_list.append(360-x)
+    for x in sorted(fitness_list):  # step one & 2, sorting high-low
+        adjusted_fitness_list.append(360-int(x))
     # print ('adjusted fitness list =', adjusted_fitness_list)
     S = 0
     for x in adjusted_fitness_list:  # Step 3
@@ -129,6 +139,7 @@ def fitness_select(fitness_dict):
     r = random.randint(0, S)  # Step 4)
     # print ('r = ', r)
     adjusted_fitness_list = adjusted_fitness_list[::-1]
+    print (fitness_dict)
     s = 0  # Used for summing up values until greater than r
     x = 0  # Used for setting lastobj and summing up list stuff
     lastobj = fitness_dict[(adjusted_fitness_list[x]-360) * -1]
@@ -142,10 +153,11 @@ def fitness_select(fitness_dict):
         x += 1
     # time.sleep(0.001)
     winner = lastobj  # Step 6
+    print (winner)
     return winner
 
 
-def roulette_generate(fitness_dict, genmethod):
+def roulette_generate(fitness_dict, genmethod, population_dict):
     '''generates chromosone from roulette wheel selection from a dictionary'''
     # genmethod is an int. Specifies how the new gene is generated
     # 0 = just copying
@@ -154,8 +166,9 @@ def roulette_generate(fitness_dict, genmethod):
     if genmethod == 0:
         return fitness_select(fitness_dict).chromosone
     elif genmethod == 1:
-        return point_swap(fitness_select(fitness_dict).chromosone,
-                          fitness_select(fitness_dict).chromosone)
+        print (fitness_select(fitness_dict))
+        return point_swap(population_dict[fitness_select(fitness_dict)].chromosone,
+                          population_dict[fitness_select(fitness_dict)].chromosone)
 
 
 def initiate_population():
@@ -164,7 +177,16 @@ def initiate_population():
         population_dict[str('individual_'+str(x))] = Individual()
     return population_dict
 
+
+def generate_generation(population_dict):
+    new_population_dict = {}
+    for x in range(0, 128):
+        population_dict[str('individual_'+str(x))] = \
+            Individual(roulette_generate(population_dict, 1, popset))
+    return new_population_dict
+
 popset = initiate_population()
 
-# Just some tests
-test_case = Individual()
+print(generate_generation(make_fitness_dict(popset)))
+for x in popset:
+    print (x)
