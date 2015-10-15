@@ -11,8 +11,8 @@
 #   total_deviation += math.abs(gene_vertex.angle)
 
 # There'll be 32 members of the population per generation.
-import sys
-import time
+# import sys
+# import time
 import random
 import math
 from collections import namedtuple
@@ -93,11 +93,17 @@ def find_angle(vertA, vertB, vertC):
 
     return deg_angle
 
+# def roulette_gene_select(obj_set):# obj_set is 1d matrix/list with all objects
+#     fitness_set = {}              # of current generation
+#     for x in obj_set:
+#         fitness_set[evaluator(x)] = x
 
-def roulette_gene_select(obj_set):  # obj_set is 1d matrix/list with all objects
-    fitness_set = {}                # of current generation
-    for x in obj_set:
-        fitness_set[evaluator(x)] = x
+
+def make_fitness_dict(object_list):
+    fitness_dict = {}
+    for x in object_list:
+        fitness_dict[x] = evaluator(x)
+    return fitness_dict
 
 
 def fitness_select(fitness_dict):
@@ -139,42 +145,26 @@ def fitness_select(fitness_dict):
     return winner
 
 
+def roulette_generate(fitness_dict, genmethod):
+    '''generates chromosone from roulette wheel selection from a dictionary'''
+    # genmethod is an int. Specifies how the new gene is generated
+    # 0 = just copying
+    # 1 = one-point selection (from two roulette winners)
+    # 2 = one-point swap (from one roulette winner): TODO
+    if genmethod == 0:
+        return fitness_select(fitness_dict).chromosone
+    elif genmethod == 1:
+        return point_swap(fitness_select(fitness_dict).chromosone,
+                          fitness_select(fitness_dict).chromosone)
+
+
+def initiate_population():
+    population_dict = {}
+    for x in range(0, 128):
+        population_dict[str('individual_'+str(x))] = Individual()
+    return population_dict
+
+popset = initiate_population()
+
 # Just some tests
 test_case = Individual()
-# # print (test_case.chromosone)
-# # print (evaluator(test_case))
-
-val_list = []
-n = 2 ** 24
-lastnum = 0
-for x in range(0, n):
-    val_list += fitness_select({006: "F", 005: "E", 004: "D", 003: "C", 02: "B",
-                                1: "A"})
-    if round((x / float(n)*100), 2) != lastnum:
-        lastnum = round((x / float(n))*100, 2)
-        print(str(lastnum) + "%  done")
-
-a, b, c, d, e, f = 0, 0, 0, 0, 0, 0
-for x in val_list:
-    if x == 'A':
-        a += 1
-    elif x == 'B':
-        b += 1
-    elif x == 'C':
-        c += 1
-    elif x == 'D':
-        d += 1
-    elif x == 'E':
-        e += 1
-    elif x == 'F':
-        f += 1
-
-print ("A occured " + str(a) + " times")
-print ("B occured " + str(b) + " times")
-print ("C occured " + str(c) + " times")
-print ("D occured " + str(d) + " times")
-print ("E occured " + str(e) + " times")
-print ("F occured " + str(f) + " times")
-
-# # print(fitness_select({360: "F", 288: "E", 216: "D", 144: "C", 72: "B",
-#                      0: "A"}))
