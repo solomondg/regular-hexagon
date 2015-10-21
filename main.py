@@ -16,6 +16,7 @@
 import random
 import math
 from collections import namedtuple
+# import statistics
 Vertex = namedtuple('vertex', 'x y')
 # This'll make the vertex tuple that we'll use for the chromosones.
 
@@ -103,19 +104,27 @@ def find_angle(vertA, vertB, vertC):
 #         fitness_set[evaluator(x)] = x
 
 
-def make_fitness_dict(population_dict):
+def make_fitness_dict(population_list):
     fitness_dict = {}
-    for x in population_dict:
-        fitness_dict[x] = round(evaluator(population_dict[x]))
-    inverse_fitness_dict = {}
-    for x in fitness_dict:
-        inverse_fitness_dict[fitness_dict[x]] = x
-    return inverse_fitness_dict
+    # print (population_dict)
+    for x in population_list:
+        fitness_dict[x] = round(evaluator(x))
+    # inverse_fitness_dict = {}
+    # for x in fitness_dict:
+    #     inverse_fitness_dict[fitness_dict[x]] = x
+    # return inverse_fitness_dict
+    return fitness_dict
+
+
+def invert_dict(dict_to_invert):
+    inverted_dict = {}
+    for x in dict_to_invert:
+        inverted_dict[dict_to_invert[x]] = x
+    return inverted_dict
 
 
 def fitness_select(fitness_dict):
-    # How to roulette wheel select:
-    # 1. Compute "inverse" fitness score (360 - fitness)
+    # How to roulette wheel select: # 1. Compute "inverse" fitness score (360 - fitness)
     # 2. Sort list from low to high fitness (maybe high to low, maybe random)
     # 3. find sum of all fitness scores, S
     # 4. Find random number r between 0 and S
@@ -123,37 +132,27 @@ def fitness_select(fitness_dict):
     # fitness score. Repeat until greater than r
     # 6. Winner = last object whose fitness score was added (first to go over r)
     x = 0
-    # print ("")
     fitness_list = []
     for x in fitness_dict:
-        fitness_list.append(x)
+        fitness_list.append(fitness_dict[x])
     adjusted_fitness_list = []
     for x in sorted(fitness_list):  # step one & 2, sorting high-low
         adjusted_fitness_list.append(360-int(x))
-    # print ('adjusted fitness list =', adjusted_fitness_list)
     S = 0
     for x in adjusted_fitness_list:  # Step 3
         S += x
-    # print ('S = ', S)
-    # r = random.random()*S
     r = random.randint(0, S)  # Step 4)
-    # print ('r = ', r)
     adjusted_fitness_list = adjusted_fitness_list[::-1]
-    print (fitness_dict)
     s = 0  # Used for summing up values until greater than r
     x = 0  # Used for setting lastobj and summing up list stuff
-    lastobj = fitness_dict[(adjusted_fitness_list[x]-360) * -1]
+    z = invert_dict(fitness_dict)
+    lastobj = z[(adjusted_fitness_list[x]-360) * -1]
     x = 0
     while s < r:  # Step 5
         s += adjusted_fitness_list[x]  # Step 5 cont
-        lastobj = fitness_dict[(adjusted_fitness_list[x]-360) * -1]  # Lastobj
-        # print ('s =', s)
-        # used for determining step6
-        # print (type(x))
+        lastobj = z[(adjusted_fitness_list[x]-360) * -1]  # Lastobj
         x += 1
-    # time.sleep(0.001)
     winner = lastobj  # Step 6
-    print (winner)
     return winner
 
 
@@ -166,16 +165,18 @@ def roulette_generate(fitness_dict, genmethod, population_dict):
     if genmethod == 0:
         return fitness_select(fitness_dict).chromosone
     elif genmethod == 1:
-        print (fitness_select(fitness_dict))
+        # print (fitness_select(fitness_dict))
         return point_swap(population_dict[fitness_select(fitness_dict)].chromosone,
                           population_dict[fitness_select(fitness_dict)].chromosone)
 
 
 def initiate_population():
-    population_dict = {}
+    ''' Returns list of objects '''
+    population_list = []
     for x in range(0, 128):
-        population_dict[str('individual_'+str(x))] = Individual()
-    return population_dict
+        y = Individual()
+        population_list.append(y)
+    return population_list
 
 
 def generate_generation(population_dict):
@@ -187,6 +188,9 @@ def generate_generation(population_dict):
 
 popset = initiate_population()
 
-print(generate_generation(make_fitness_dict(popset)))
-for x in popset:
-    print (x)
+# print(generate_generation(make_fitness_dict(popset)))
+# for x in popset:
+#     print (x)
+x = make_fitness_dict(popset)
+# print (x)
+y = fitness_select(x)
