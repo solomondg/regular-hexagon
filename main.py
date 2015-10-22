@@ -31,8 +31,7 @@ Vertex = namedtuple('vertex', 'x y')
 #         pass
 
 
-def varstore():
-    varstore.mutation_rate = 0.02
+mutation_rate = 2  # (out of 100)
 
 
 def chromosonegen():
@@ -185,6 +184,35 @@ def generate_generation(population_dict):
         population_dict[str('individual_'+str(x))] = \
             Individual(roulette_generate(population_dict, 1, popset))
     return new_population_dict
+
+
+def mutation_chance(mutation_rate):
+    x = random.randint(0, round(100.0/mutation_rate))
+    if x == (round((100.0/mutation_rate)/2)):
+        return True
+    else:
+        return False
+
+
+def bound_mutation(individual):
+    if random.randint(0, 1) == 0:
+        # Lower Bound Mutation
+        y = Vertex(0, 0)
+        individual.chromosone = [y, y, y, y, y, y]
+    else:
+        # upper bound mutation
+        y = Vertex(10, 10)
+        individual.chromosone = [y, y, y, y, y, y]
+
+
+def chromosone_regen(individual):
+    individual.chromosone = chromosonegen
+
+
+def chromosone_scramble(individual):
+    for x in range(0, random.randint(0, 100)):
+        individual.chromosone = \
+            point_swap[individual.chromosone, individual.chromosone]
 
 popset = initiate_population()
 
