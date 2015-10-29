@@ -31,7 +31,9 @@ Vertex = namedtuple('vertex', 'x y')
 #         pass
 
 
-mutation_rate = 2  # (out of 100)
+mutation_rate = 100  # (out of 100)
+
+population_size = 32
 
 
 def chromosonegen():
@@ -72,6 +74,7 @@ def fragment_return(chromosone, startpos, endpos):
 
 def evaluator(to_eval):
     x = to_eval.chromosone
+    # print (to_eval.chromosone)
     angle_set = [find_angle(x[5], x[0], x[1]),  # Run the find angle function
                  find_angle(x[0], x[1], x[2]),  # with all the vertcies
                  find_angle(x[1], x[2], x[3]),
@@ -123,7 +126,8 @@ def invert_dict(dict_to_invert):
 
 
 def fitness_select(fitness_dict):
-    # How to roulette wheel select: # 1. Compute "inverse" fitness score (360 - fitness)
+    # How to roulette wheel select:
+    # 1. Compute "inverse" fitness score (360 - fitness)
     # 2. Sort list from low to high fitness (maybe high to low, maybe random)
     # 3. find sum of all fitness scores, S
     # 4. Find random number r between 0 and S
@@ -155,7 +159,7 @@ def fitness_select(fitness_dict):
     return winner
 
 
-def roulette_generate(fitness_dict, genmethod, population_dict):
+def roulette_generate(fitness_dict, genmethod):
     '''generates chromosone from roulette wheel selection from a dictionary'''
     # genmethod is an int. Specifies how the new gene is generated
     # 0 = just copying
@@ -165,33 +169,48 @@ def roulette_generate(fitness_dict, genmethod, population_dict):
         return fitness_select(fitness_dict).chromosone
     elif genmethod == 1:
         # print (fitness_select(fitness_dict))
-        return point_swap(population_dict[fitness_select(fitness_dict)].chromosone,
-                          population_dict[fitness_select(fitness_dict)].chromosone)
+        return point_swap(
+            fitness_select(fitness_dict).chromosone,
+            fitness_select(fitness_dict).chromosone)
 
 
 def initiate_population():
     ''' Returns list of objects '''
     population_list = []
-    for x in range(0, 128):
+    for x in range(0, population_size):
         y = Individual()
         population_list.append(y)
     return population_list
 
 
-def generate_generation(population_dict):
-    new_population_dict = {}
-    for x in range(0, 128):
-        population_dict[str('individual_'+str(x))] = \
-            Individual(roulette_generate(population_dict, 1, popset))
-    return new_population_dict
+def generate_generation(population_list):
+    # takes fitness dictionary, makes list of new individuals, TODO
+    for x in range(0, len(population_list)):
+        population_list[x].chromosone = \
+                        roulette_generate(make_fitness_dict(population_list), 1)
+    return population_list
 
 
 def mutation_chance(mutation_rate):
-    x = random.randint(0, round(100.0/mutation_rate))
+    x = random.randint(0, 100)
     if x == (round((100.0/mutation_rate)/2)):
         return True
     else:
         return False
+
+
+def random_mutation(individual):
+    x = random.randint(0, 128)
+    print (individual)
+    if x < 8:
+        individual = bound_mutation(individual)
+    elif x < 32:
+        individual = chromosone_regen(individual)
+    elif x < 64:
+        individual = chromosone_scramble(individual)
+    else:
+        individual = arithmatic_mutation(individual)
+    return individual
 
 
 def bound_mutation(individual):
@@ -203,16 +222,40 @@ def bound_mutation(individual):
         # upper bound mutation
         y = Vertex(10, 10)
         individual.chromosone = [y, y, y, y, y, y]
+    return individual
+
+
+def arithmatic_mutation(individual):
+    x = random.randint(1, 4)
+    z = random.randint(1, 10)
+    a = random.randint(1, 10)
+    for y in range(len(individual.chromosone)):
+        print (individual.chromosone[y])
+        if x == 1:
+                individual.chromosone[y].x += z
+                individual.chromosone[y].y += a
+        elif x == 2:
+                individual.chromosone[y].x -= z
+                individual.chromosone[y].y -= a
+        elif x == 3:
+                individual.chromosone[y].x = individual.chromosone[y].x * z
+                individual.chromosone[y].y = individual.chromosone[y].z * a
+        elif x == 4:
+                individual.chromosone[y].x = individual.chromosone[y].x / z
+                individual.chromosone[y].y = individual.chromosone[y].z / a
+    return individual
 
 
 def chromosone_regen(individual):
     individual.chromosone = chromosonegen
+    return individual
 
 
 def chromosone_scramble(individual):
     for x in range(0, random.randint(0, 100)):
         individual.chromosone = \
-            point_swap[individual.chromosone, individual.chromosone]
+            point_swap(individual.chromosone, individual.chromosone)
+    return individual
 
 popset = initiate_population()
 
@@ -222,3 +265,15 @@ popset = initiate_population()
 x = make_fitness_dict(popset)
 # print (x)
 y = fitness_select(x)
+
+# print (y.chromosone)
+y = 0
+for n in range(0, 1024):
+    x = make_fitness_dict(popset)
+    popset = generate_generation(popset)
+    y += 1
+    print ("Generation " + str(y) + ". Example roulette selection is " +
+           str(evaluator(fitness_select(x))))
+    for n in range(0, len(popset)):
+        if mutation_chance(0.02) == True:
+            popset[n] = random_mutation(popset[n])
