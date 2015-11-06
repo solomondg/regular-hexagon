@@ -31,9 +31,9 @@ Vertex = namedtuple('vertex', 'x y')
 #         pass
 
 
-mutation_rate = 100  # (out of 100)
+mutation_rate = 3  # (out of 100)
 
-population_size = 32
+population_size = 256
 
 
 def chromosonegen():
@@ -62,10 +62,10 @@ class Individual():
             self.chromosone = input_chromosone
 
 
-def point_swap(input_chromosone, outside_chromosone):
+def point_swap(chrom1, chrom2):
     """Swaps genes between two points in an input and output chromosone"""
-    swap_pos = random.randrange(1, 5, 1)  # Randomly picks pos to swap at
-    return input_chromosone[:swap_pos] + outside_chromosone[swap_pos:]  # swaps
+    swap_pos = random.randint(0, 6)  # Randomly picks pos to swap at
+    return chrom1[swap_pos:] + chrom2[:swap_pos]
 
 
 def fragment_return(chromosone, startpos, endpos):
@@ -73,18 +73,21 @@ def fragment_return(chromosone, startpos, endpos):
 
 
 def evaluator(to_eval):
-    x = to_eval.chromosone
-    # print (to_eval.chromosone)
-    angle_set = [find_angle(x[5], x[0], x[1]),  # Run the find angle function
-                 find_angle(x[0], x[1], x[2]),  # with all the vertcies
-                 find_angle(x[1], x[2], x[3]),
-                 find_angle(x[2], x[3], x[4]),
-                 find_angle(x[3], x[4], x[5]),
-                 find_angle(x[4], x[5], x[0])]
-    total_error = 0
-    for y in angle_set:
-        total_error += math.fabs(60-y)  # Calculate total error with abs(60-y)
-    return total_error
+    x = to_eval.chromosone  # print (to_eval.chromosone)
+    try:
+        angle_set = [find_angle(x[5], x[0], x[1]),  # Run the find anglefunction
+                     find_angle(x[0], x[1], x[2]),  # with all the vertcies
+                     find_angle(x[1], x[2], x[3]),
+                     find_angle(x[2], x[3], x[4]),
+                     find_angle(x[3], x[4], x[5]),
+                     find_angle(x[4], x[5], x[0])]
+        total_error = 0
+        for y in angle_set:
+            total_error += math.fabs(60-y)  # Calculate totalerror withabs(60-y)
+        # print (total_error)
+        return total_error
+    except ZeroDivisionError:
+        return 360
 
 
 def find_angle(vertA, vertB, vertC):
@@ -156,6 +159,8 @@ def fitness_select(fitness_dict):
         lastobj = z[(adjusted_fitness_list[x]-360) * -1]  # Lastobj
         x += 1
     winner = lastobj  # Step 6
+    if evaluator(winner) == 360:
+        winner = fitness_select(fitness_dict)
     return winner
 
 
@@ -169,9 +174,21 @@ def roulette_generate(fitness_dict, genmethod):
         return fitness_select(fitness_dict).chromosone
     elif genmethod == 1:
         # print (fitness_select(fitness_dict))
-        return point_swap(
-            fitness_select(fitness_dict).chromosone,
-            fitness_select(fitness_dict).chromosone)
+        x = fitness_select(fitness_dict).chromosone
+        y = fitness_select(fitness_dict).chromosone
+        while checker(x, y):
+            y = fitness_select(fitness_dict).chromosone
+            x = fitness_select(fitness_dict).chromosone
+        return point_swap(x, y)
+
+
+def checker(a, b):
+    returns = False
+    while n in a:
+        for m in b:
+            if n == m:
+                returns = True
+    return returns
 
 
 def initiate_population():
@@ -188,62 +205,67 @@ def generate_generation(population_list):
     for x in range(0, len(population_list)):
         population_list[x].chromosone = \
                         roulette_generate(make_fitness_dict(population_list), 1)
+        # print ("generated generation " + str(x))
     return population_list
 
 
 def mutation_chance(mutation_rate):
     x = random.randint(0, 100)
-    if x == (round((100.0/mutation_rate)/2)):
+    if x < mutation_rate:
         return True
     else:
         return False
 
 
 def random_mutation(individual):
-    x = random.randint(0, 128)
-    print (individual)
-    if x < 8:
-        individual = bound_mutation(individual)
-    elif x < 32:
-        individual = chromosone_regen(individual)
-    elif x < 64:
-        individual = chromosone_scramble(individual)
-    else:
-        individual = arithmatic_mutation(individual)
+    # x = random.randint(0, 128)
+    # print (individual.chromosone)
+    # chromosone_regen(individual)
+    individual = chromosone_scramble(individual)
+    # print (individual.chromosone)
+    # if x < 8:
+    #     individual = bound_mutation(individual)
+    # elif x < 32:
+    #     individual = chromosone_regen(individual)
+    # elif x < 64:
+    #     individual = chromosone_scramble(individual)
+    # else:
+    #     individual = arithmatic_mutation(individual)
     return individual
 
 
-def bound_mutation(individual):
-    if random.randint(0, 1) == 0:
-        # Lower Bound Mutation
-        y = Vertex(0, 0)
-        individual.chromosone = [y, y, y, y, y, y]
-    else:
-        # upper bound mutation
-        y = Vertex(10, 10)
-        individual.chromosone = [y, y, y, y, y, y]
-    return individual
+# def bound_mutation(individual):
+#     if random.randint(0, 1) == 0:
+#         # Lower Bound Mutation
+#         y = Vertex(1, 1)
+#         individual.chromosone = [y, y, y, y, y, y]
+#     else:
+#         # upper bound mutation
+#         y = Vertex(10, 10)
+#         individual.chromosone = [y, y, y, y, y, y]
+#     return individual
 
 
-def arithmatic_mutation(individual):
-    x = random.randint(1, 4)
-    z = random.randint(1, 10)
-    a = random.randint(1, 10)
-    for y in range(len(individual.chromosone)):
-        print (individual.chromosone[y])
-        if x == 1:
-                individual.chromosone[y].x += z
-                individual.chromosone[y].y += a
-        elif x == 2:
-                individual.chromosone[y].x -= z
-                individual.chromosone[y].y -= a
-        elif x == 3:
-                individual.chromosone[y].x = individual.chromosone[y].x * z
-                individual.chromosone[y].y = individual.chromosone[y].z * a
-        elif x == 4:
-                individual.chromosone[y].x = individual.chromosone[y].x / z
-                individual.chromosone[y].y = individual.chromosone[y].z / a
-    return individual
+# def arithmatic_mutation(individual):
+#     x = random.randint(1, 4)
+#     z = random.randint(1, 10)
+#     a = random.randint(1, 10)
+#     x = 1
+#     temp = []
+#     for y in range(len(temp)):
+#         if x == 1:
+#                 temp[y] = Vertex(individual.chromosone[y].x + z,
+#                                  individual.chromosone[y].y + a)
+#         elif x == 2:
+#                 temp[y].x = individual.chromosone[y].x - z
+#                 temp[y].y = individual.chromosone[y].y - a
+#         elif x == 3:
+#                 temp[y].x = individual.chromosone[y].x * z
+#                 temp[y].y = individual.chromosone[y].z * a
+#         elif x == 4:
+#                 temp[y].x = individual.chromosone[y].x / z
+#                 temp[y].y = individual.chromosone[y].z / a
+#     return temp
 
 
 def chromosone_regen(individual):
@@ -252,9 +274,9 @@ def chromosone_regen(individual):
 
 
 def chromosone_scramble(individual):
-    for x in range(0, random.randint(0, 100)):
-        individual.chromosone = \
-            point_swap(individual.chromosone, individual.chromosone)
+    # for x in range(random.randint(0, 100)):
+    individual.chromosone = \
+        point_swap(individual.chromosone, individual.chromosone)
     return individual
 
 popset = initiate_population()
@@ -268,12 +290,18 @@ y = fitness_select(x)
 
 # print (y.chromosone)
 y = 0
-for n in range(0, 1024):
+for n in range(1024):
     x = make_fitness_dict(popset)
     popset = generate_generation(popset)
     y += 1
     print ("Generation " + str(y) + ". Example roulette selection is " +
            str(evaluator(fitness_select(x))))
-    for n in range(0, len(popset)):
-        if mutation_chance(0.02) == True:
-            popset[n] = random_mutation(popset[n])
+    # for n in range(0, len(popset)):
+    #     if mutation_chance(mutation_rate):
+    #         popset[n] = random_mutation(popset[n])
+    fitlist = []
+    for z in x:
+        fitlist.append(x[z])
+    a = findmax(x, fitlist[0])
+    print (a.chromosone)
+
