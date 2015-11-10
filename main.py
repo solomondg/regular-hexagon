@@ -16,6 +16,7 @@
 import random
 import math
 from collections import namedtuple
+csvgen = True
 # import statistics
 Vertex = namedtuple('vertex', 'x y')
 # This'll make the vertex tuple that we'll use for the chromosones.
@@ -31,9 +32,9 @@ Vertex = namedtuple('vertex', 'x y')
 #         pass
 
 
-mutation_rate = 3  # (out of 100)
+mutation_rate = 2  # (out of 100)
 
-population_size = 256
+population_size = 64
 
 
 def chromosonegen():
@@ -184,7 +185,7 @@ def roulette_generate(fitness_dict, genmethod):
 
 def checker(a, b):
     returns = False
-    while n in a:
+    for n in a:
         for m in b:
             if n == m:
                 returns = True
@@ -218,10 +219,13 @@ def mutation_chance(mutation_rate):
 
 
 def random_mutation(individual):
-    # x = random.randint(0, 128)
+    x = random.randint(0, 128)
     # print (individual.chromosone)
     # chromosone_regen(individual)
-    individual = chromosone_scramble(individual)
+    if x < 64:
+        individual.chromosone = chromosone_scramble(individual)
+    else:
+        individual.chromosone = chromosone_regen(individual)
     # print (individual.chromosone)
     # if x < 8:
     #     individual = bound_mutation(individual)
@@ -231,7 +235,7 @@ def random_mutation(individual):
     #     individual = chromosone_scramble(individual)
     # else:
     #     individual = arithmatic_mutation(individual)
-    return individual
+    return individual.chromosone
 
 
 # def bound_mutation(individual):
@@ -267,17 +271,32 @@ def random_mutation(individual):
 #                 temp[y].y = individual.chromosone[y].z / a
 #     return temp
 
+def return_highest_fitness_value(fitness_dict):
+    y = []
+    for x in fitness_dict:
+        y.append(fitness_dict[x])
+
+    return sorted(y)[0]
+
+
+def return_highest_fitness_chromosone(fitness_dict):
+    max_fitness_object = 360
+    max_fitness = 360
+    for x in fitness_dict:
+        if fitness_dict[x] < max_fitness:
+            max_fitness_object = x
+            max_fitness = fitness_dict[max_fitness_object]
+    return max_fitness_object.chromosone
+
 
 def chromosone_regen(individual):
-    individual.chromosone = chromosonegen
-    return individual
+    individual.chromosone = chromosonegen()
+    return individual.chromosone
 
 
 def chromosone_scramble(individual):
     # for x in range(random.randint(0, 100)):
-    individual.chromosone = \
-        point_swap(individual.chromosone, individual.chromosone)
-    return individual
+    return point_swap(individual.chromosone, individual.chromosone)
 
 popset = initiate_population()
 
@@ -290,18 +309,29 @@ y = fitness_select(x)
 
 # print (y.chromosone)
 y = 0
-for n in range(1024):
-    x = make_fitness_dict(popset)
-    popset = generate_generation(popset)
-    y += 1
-    print ("Generation " + str(y) + ". Example roulette selection is " +
-           str(evaluator(fitness_select(x))))
-    # for n in range(0, len(popset)):
-    #     if mutation_chance(mutation_rate):
-    #         popset[n] = random_mutation(popset[n])
-    fitlist = []
-    for z in x:
-        fitlist.append(x[z])
-    a = findmax(x, fitlist[0])
-    print (a.chromosone)
+if csvgen:
+    csv = open('csv.txt', 'w')
+    csvtemp = ""
 
+exit = False
+
+while exit is False:
+    y += 1
+    for n in range(0, len(popset)):
+        if mutation_chance(mutation_rate):
+            # print ("before: " + str(popset[n].chromosone))
+            popset[n].chromosone = random_mutation(popset[n])
+            # print ("after: " + str(popset[n].chromosone))
+    x = make_fitness_dict(popset)
+    print ("Generation " + str(y) + ". Top score is  " +
+           str(return_highest_fitness_value(x)) + " with a chromosone of " +
+           str(return_highest_fitness_chromosone(x)))
+    if csvgen:
+        csvtemp += str(y) + "," + str(return_highest_fitness_value(x)) + "\n"
+    if return_highest_fitness_value(x) < 32:
+        exit = True
+        print (return_highest_fitness_chromosone(x))
+    popset = generate_generation(popset)
+
+if csvgen:
+    csv.write(csvtemp)
