@@ -32,9 +32,9 @@ Vertex = namedtuple('vertex', 'x y')
 #         pass
 
 
-mutation_rate = 2  # (out of 100)
+mutation_rate = 2 # (out of 100)
 
-population_size = 64
+population_size = 32
 
 
 def chromosonegen():
@@ -222,54 +222,60 @@ def random_mutation(individual):
     x = random.randint(0, 128)
     # print (individual.chromosone)
     # chromosone_regen(individual)
-    if x < 64:
-        individual.chromosone = chromosone_scramble(individual)
-    else:
-        individual.chromosone = chromosone_regen(individual)
-    # print (individual.chromosone)
-    # if x < 8:
-    #     individual = bound_mutation(individual)
-    # elif x < 32:
-    #     individual = chromosone_regen(individual)
-    # elif x < 64:
-    #     individual = chromosone_scramble(individual)
+    # if x < 64:
+    #     individual.chromosone = chromosone_scramble(individual)
     # else:
-    #     individual = arithmatic_mutation(individual)
+    #     individual.chromosone = chromosone_regen(individual)
+    # print (individual.chromosone)
+    if x < 16:
+        individual.chromosone = bound_mutation(individual)
+        print("Bonding")
+    elif x < 32:
+        individual.chromosone = chromosone_regen(individual)
+        print("Regening")
+    elif x < 64:
+        individual.chromosone = chromosone_scramble(individual)
+        print ("Scrambling")
+    else:
+        # individual.chromosone = arithmatic_mutation(individual)
+        print ("Arithmatically mutating)")
     return individual.chromosone
 
 
-# def bound_mutation(individual):
-#     if random.randint(0, 1) == 0:
-#         # Lower Bound Mutation
-#         y = Vertex(1, 1)
-#         individual.chromosone = [y, y, y, y, y, y]
-#     else:
-#         # upper bound mutation
-#         y = Vertex(10, 10)
-#         individual.chromosone = [y, y, y, y, y, y]
-#     return individual
+def bound_mutation(individual):
+    if random.randint(0, 1) == 0:
+        # Lower Bound Mutation
+        y = Vertex(1, 1)
+        individual.chromosone = [y, y, y, y, y, y]
+    else:
+        # upper bound mutation
+        y = Vertex(10, 10)
+        individual.chromosone = [y, y, y, y, y, y]
+    return individual.chromosone
 
 
-# def arithmatic_mutation(individual):
-#     x = random.randint(1, 4)
-#     z = random.randint(1, 10)
-#     a = random.randint(1, 10)
-#     x = 1
-#     temp = []
-#     for y in range(len(temp)):
-#         if x == 1:
-#                 temp[y] = Vertex(individual.chromosone[y].x + z,
-#                                  individual.chromosone[y].y + a)
-#         elif x == 2:
-#                 temp[y].x = individual.chromosone[y].x - z
-#                 temp[y].y = individual.chromosone[y].y - a
-#         elif x == 3:
-#                 temp[y].x = individual.chromosone[y].x * z
-#                 temp[y].y = individual.chromosone[y].z * a
-#         elif x == 4:
-#                 temp[y].x = individual.chromosone[y].x / z
-#                 temp[y].y = individual.chromosone[y].z / a
-#     return temp
+def arithmatic_mutation(individual):
+    x = random.randint(1, 4)
+    z = random.randint(1, 10)
+    a = random.randint(1, 10)
+    x = 1
+    temp = []
+    y = 0
+    for y in range(len(temp)):
+        if x == 1:
+                temp[y] = Vertex(individual.chromosone[y].x + z,
+                                 individual.chromosone[y].y + a)
+        elif x == 2:
+                temp[y].x = individual.chromosone[y].x - z
+                temp[y].y = individual.chromosone[y].y - a
+        elif x == 3:
+                temp[y].x = individual.chromosone[y].x * z
+                temp[y].y = individual.chromosone[y].z * a
+        elif x == 4:
+                temp[y].x = individual.chromosone[y].x / z
+                temp[y].y = individual.chromosone[y].z / a
+    return temp
+
 
 def return_highest_fitness_value(fitness_dict):
     y = []
@@ -277,6 +283,13 @@ def return_highest_fitness_value(fitness_dict):
         y.append(fitness_dict[x])
 
     return sorted(y)[0]
+
+
+def return_average_fitness(fitness_dict):
+    y = 0
+    for x in fitness_dict:
+        y += fitness_dict[x]
+    return (y / len(fitness_dict))
 
 
 def return_highest_fitness_chromosone(fitness_dict):
@@ -318,17 +331,21 @@ exit = False
 while exit is False:
     y += 1
     for n in range(0, len(popset)):
-        if mutation_chance(mutation_rate):
+        h = mutation_chance(mutation_rate)
+        # print (h)
+        if h:
             # print ("before: " + str(popset[n].chromosone))
             popset[n].chromosone = random_mutation(popset[n])
             # print ("after: " + str(popset[n].chromosone))
     x = make_fitness_dict(popset)
     print ("Generation " + str(y) + ". Top score is  " +
            str(return_highest_fitness_value(x)) + " with a chromosone of " +
-           str(return_highest_fitness_chromosone(x)))
+           str(return_highest_fitness_chromosone(x)) + ". Avg fit val is " +
+           str(return_average_fitness(x)))
     if csvgen:
-        csvtemp += str(y) + "," + str(return_highest_fitness_value(x)) + "\n"
-    if return_highest_fitness_value(x) < 32:
+        csvtemp += str(y) + "," + str(return_highest_fitness_value(x)) + "," +\
+            str(return_average_fitness(x)) + "\n"
+    if return_highest_fitness_value(x) < 16:
         exit = True
         print (return_highest_fitness_chromosone(x))
     popset = generate_generation(popset)
